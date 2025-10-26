@@ -36,15 +36,15 @@ class OpenAIService:
         Returns:
             bool: True if key was set successfully
         """
-        if not openai:
+        if not openai_available:
             raise ImportError("OpenAI package not installed")
 
         try:
             # Test the API key by making a simple request
-            openai.api_key = api_key
+            client = OpenAI(api_key=api_key)
 
             # Make a test request to validate the key
-            openai.models.list()
+            client.models.list()
 
             # Store in app config if valid
             current_app.config['OPENAI_API_KEY'] = api_key
@@ -125,14 +125,14 @@ class OpenAIService:
         Returns:
             dict: Contains 'sql' query and 'explanation'
         """
-        if not openai:
+        if not openai_available:
             raise ImportError("OpenAI package not installed")
 
         api_key = current_app.config.get('OPENAI_API_KEY')
         if not api_key:
             raise ValueError("OpenAI API key not set")
 
-        openai.api_key = api_key
+        client = OpenAI(api_key=api_key)
 
         # Get database schema
         schema = OpenAIService.get_database_schema()
@@ -163,16 +163,51 @@ Important notes:
 """
 
         try:
-            response = openai.responses.create(
-                model="gpt-5",
-                input=prompt
+            response = client.chat.completions.create(
+                model="gpt-4",
+                messages=[
+                    {"role": "system", 
+                     "content": "You are a helpful SQL expert assistant."},
+                    {"role": "user", "content": prompt}
+                ],
+                max_tokens=500,
+                temperature=0.1
             )
 
-            return response.output_text.strip()
+            content = response.choices[0].message.content.strip()
+
+            # Parse the response to extract SQL and explanation
+            lines = content.split('\n')
+            sql_query = ""
+            explanation = ""
+
+            for line in lines:
+                if line.startswith('SQL:'):
+                    sql_query = line[4:].strip()
+                elif line.startswith('EXPLANATION:'):
+                    explanation = line[12:].strip()
+
+            return {
+                'sql': sql_query,
+                'explanation': explanation,
+                'raw_response': content
+            }
         except Exception as e:
             current_app.logger.error(f"OpenAI API error: {str(e)}")
             raise Exception(f"Failed to convert query: {str(e)}") from e
 
+    @staticmethod
+    def execute_sql_query(sql_query: str, limit: int = 100) -> dict:
+        """
+        Execute a SQL query safely
+
+        Args:
+            sql_query: The SQL query to execute
+            limit: Maximum number of rows to return
+
+        Returns:
+            dict: Query results with data, columns, and metadata
+        """
         if not text:
             raise ImportError("SQLAlchemy text function not available")
 
