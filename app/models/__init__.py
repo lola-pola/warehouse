@@ -6,6 +6,7 @@ from .user import User
 from .quote import Quote
 from .policy import Policy
 from .payment import PaymentType, PaymentTransaction
+from .feature_store import FeatureType, Feature, FeatureMetadata
 
 __all__ = [
     'db',
@@ -13,5 +14,8 @@ __all__ = [
     'Quote', 
     'Policy',
     'PaymentType',
-    'PaymentTransaction'
+    'PaymentTransaction',
+    'FeatureType',
+    'Feature',
+    'FeatureMetadata'
 ]

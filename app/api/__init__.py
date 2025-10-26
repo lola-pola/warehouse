@@ -8,7 +8,8 @@ from .resources import (
     create_policy_namespace,
     create_payment_namespace,
     create_analytics_namespace,
-    create_openai_namespace
+    create_openai_namespace,
+    create_feature_store_namespace
 )
 
 __all__ = [
@@ -18,5 +19,6 @@ __all__ = [
     'create_policy_namespace',
     'create_payment_namespace',
     'create_analytics_namespace',
-    'create_openai_namespace'
+    'create_openai_namespace',
+    'create_feature_store_namespace'
 ]

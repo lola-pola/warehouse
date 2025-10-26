@@ -1,0 +1,41 @@
+Problem Statement:
+
+In order to build a model, a Data Scientist extracts features from a data warehouse using a combination of SQL and python in a Jupyter notebook. Those features are used to train the model.
+
+Now it's time for a Backend Software Engineer to serve the model in production. The engineer creates a web application, loads the model, and exposes an API to make a prediction. The engineer must also implement code to extract features at inference time, which must be identical to the ones extracted using SQL and python in the Data Scientist's Jupyter notebook.
+
+This reimplementation of features for each model leads to bugs and code duplication.
+
+Task
+
+Design and implement a minimal working feature store.
+
+Your data warehouse includes 4 tables:
+
+User
+Quote - many Quotes to one User
+Policy - many Policies to one Quote
+Payment Transactions - one Payment Transaction to one Policy
+We want to serve some features in real time, which can't be done from the data warehouse. In order to do so you should run batch feature extraction on the above tables to extract the below features into a real time data store
+
+
+this is the features 
+User Policy Time of Purchase - for the key user_id return the policy payment transaction time
+
+Time from Quote Creation to Binding - for the key quote_id return the difference between the binding time and creation time
+
+Count of Users Failed Transaction - for the key user_id return the number of failed Payment Transactions
+
+Type of Payment - for a payment _transaction_id return the payment type
+
+For each single feature we serve at inference time, we also want to serve as a bulk for the Data Scientist to use during training time. Finally, we also would like the Data Scientist to be able to discover which features exist.
+
+
+
+Therefore you should 3 APIs: feature inference, feature training, feature discovery
+
+there is no need to connect to external databases
+
+
+
+>> list of deatures >> argoflow >>> feature x < retrun 

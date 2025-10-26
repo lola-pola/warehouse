@@ -14,7 +14,8 @@ from app.api import (
     create_policy_namespace,
     create_payment_namespace,
     create_analytics_namespace,
-    create_openai_namespace
+    create_openai_namespace,
+    create_feature_store_namespace
 )
 
 
@@ -57,6 +58,7 @@ def create_app(config_name='default'):
     payments_ns = create_payment_namespace(api, schemas)
     analytics_ns = create_analytics_namespace(api, schemas)
     openai_ns = create_openai_namespace(api, schemas)
+    features_ns = create_feature_store_namespace(api, schemas)
     
     # Add namespaces to API
     api.add_namespace(users_ns)
@@ -65,6 +67,7 @@ def create_app(config_name='default'):
     api.add_namespace(payments_ns)
     api.add_namespace(analytics_ns)
     api.add_namespace(openai_ns)
+    api.add_namespace(features_ns)
     
     # Create database tables
     with app.app_context():

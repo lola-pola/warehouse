@@ -95,6 +95,12 @@ The API will be available at `http://localhost:25000` with Swagger documentation
 - `GET /api/v1/analytics/payment-stats` - Payment statistics by type
 - `GET /api/v1/analytics/user-stats` - User-related statistics
 
+### Feature Store
+- `GET /api/v1/features/discovery` - Discover available features
+- `POST /api/v1/features/inference` - Get single feature for real-time inference
+- `POST /api/v1/features/training` - Get bulk features for training
+- `POST /api/v1/features/extract` - Run batch feature extraction
+
 ## 🧪 Testing
 
 ### Run all tests
@@ -137,6 +143,7 @@ Business logic layer:
 - `PolicyService`: Policy management
 - `PaymentService`: Payment processing
 - `AnalyticsService`: Statistics and reporting
+- `FeatureStoreService`: Feature computation and caching
 
 #### API Layer (`app/api/`)
 - `schemas.py`: Request/response validation schemas
@@ -211,6 +218,7 @@ Additional documentation is available in the `docs/` folder:
 - [Database Management](docs/README_DATABASE_MANAGEMENT.md)
 - [Backup & Restore](docs/README_BACKUP_RESTORE.md)
 - [Migrations](docs/README_MIGRATIONS.md)
+- [Feature Store](docs/FEATURE_STORE.md)
 
 ## 🤝 Contributing
 

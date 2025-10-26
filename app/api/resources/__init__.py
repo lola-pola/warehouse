@@ -7,6 +7,7 @@ from .policies import create_policy_namespace
 from .payments import create_payment_namespace
 from .analytics import create_analytics_namespace
 from .openai_queries import create_openai_namespace
+from .feature_store import create_feature_store_namespace
 
 __all__ = [
     'create_user_namespace',
@@ -14,5 +15,6 @@ __all__ = [
     'create_policy_namespace',
     'create_payment_namespace',
     'create_analytics_namespace',
-    'create_openai_namespace'
+    'create_openai_namespace',
+    'create_feature_store_namespace'
 ]
