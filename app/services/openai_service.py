@@ -34,12 +34,13 @@ class OpenAIService:
             tuple: (is_valid, error_message)
         """
         if not openai_available:
-            return False, "OpenAI package not installed. Please install openai package."
+            return False, ("OpenAI package not installed. Please install "
+                           "openai package.")
 
         api_key = current_app.config.get('OPENAI_API_KEY')
         if not api_key:
-            return False, ("OpenAI API key not configured. Please set your API key "
-                          "first using the /openai/set-key endpoint.")
+            return False, ("OpenAI API key not configured. Please set your "
+                           "API key first using the /openai/set-key endpoint.")
 
         try:
             # Test the API key by making a simple request
@@ -83,11 +84,11 @@ class OpenAIService:
     def is_authenticated() -> bool:
         """
         Check if OpenAI is properly authenticated without making an API call
-        
+
         Returns:
             bool: True if API key is configured, False otherwise
         """
-        return (openai_available and 
+        return (openai_available and
                 current_app.config.get('OPENAI_API_KEY') is not None)
 
     @staticmethod
@@ -161,7 +162,7 @@ class OpenAIService:
 
         Returns:
             dict: Contains 'sql' query and 'explanation'
-        
+
         Raises:
             ValueError: If OpenAI authentication fails
         """

@@ -48,7 +48,8 @@ def create_openai_namespace(api, schemas):
     })
 
     auth_status_model = openai_ns.model('AuthStatus', {
-        'authenticated': fields.Boolean(description='Whether OpenAI is authenticated'),
+        'authenticated': fields.Boolean(
+            description='Whether OpenAI is authenticated'),
         'message': fields.String(description='Status message')
     })
 
@@ -94,14 +95,15 @@ def create_openai_namespace(api, schemas):
             """Check if OpenAI is properly authenticated"""
             try:
                 is_authenticated = OpenAIService.is_authenticated()
-                
+
                 if is_authenticated:
                     # Validate the actual API key
                     is_valid, error_msg = OpenAIService._validate_openai_auth()
                     if is_valid:
                         return {
                             'authenticated': True,
-                            'message': 'OpenAI API is properly configured and authenticated'
+                            'message': ('OpenAI API is properly configured '
+                                        'and authenticated')
                         }, 200
                     else:
                         return {
@@ -111,7 +113,9 @@ def create_openai_namespace(api, schemas):
                 else:
                     return {
                         'authenticated': False,
-                        'message': 'OpenAI API key not configured. Please set your API key using the /openai/set-key endpoint.'
+                        'message': ('OpenAI API key not configured. Please '
+                                    'set your API key using the '
+                                    '/openai/set-key endpoint.')
                     }, 401
 
             except Exception as e:
@@ -148,7 +152,9 @@ def create_openai_namespace(api, schemas):
                 # Check if OpenAI is authenticated first
                 if not OpenAIService.is_authenticated():
                     return {
-                        'error': 'OpenAI not configured. Please set your API key first using the /openai/set-key endpoint.'
+                        'error': ('OpenAI not configured. Please set your '
+                                  'API key first using the /openai/set-key '
+                                  'endpoint.')
                     }, 401
 
                 data = request.get_json()
@@ -183,7 +189,8 @@ def create_openai_namespace(api, schemas):
 
             except ValueError as e:
                 # Authentication and validation errors
-                if "authentication" in str(e).lower() or "api key" in str(e).lower():
+                error_str = str(e).lower()
+                if "authentication" in error_str or "api key" in error_str:
                     return {'error': str(e)}, 401
                 return {'error': str(e)}, 400
             except Exception as e:
