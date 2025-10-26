@@ -160,13 +160,15 @@ Important notes:
 - Use appropriate JOINs when needed
 - Consider using LIMIT for large result sets
 - Make sure the query is syntactically correct for SQLite
+- Do NOT include semicolons at the end of the SQL query
+- Return only the SQL query without any extra formatting or semicolons
 """
 
         try:
             response = client.chat.completions.create(
                 model="gpt-4",
                 messages=[
-                    {"role": "system", 
+                    {"role": "system",
                      "content": "You are a helpful SQL expert assistant."},
                     {"role": "user", "content": prompt}
                 ],
@@ -212,6 +214,10 @@ Important notes:
             raise ImportError("SQLAlchemy text function not available")
 
         try:
+            # Clean up the SQL query - remove trailing semicolons
+            sql_query = sql_query.strip()
+            if sql_query.endswith(';'):
+                sql_query = sql_query[:-1]
             # Add LIMIT if not present and it's a SELECT query
             sql_lower = sql_query.lower().strip()
             if sql_lower.startswith('select') and 'limit' not in sql_lower:
