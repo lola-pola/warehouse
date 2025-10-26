@@ -2,9 +2,11 @@
 OpenAI service for natural language to SQL conversion
 """
 try:
-    import openai
+    from openai import OpenAI
+    openai_available = True
 except ImportError:
-    openai = None
+    OpenAI = None
+    openai_available = False
 
 from flask import current_app
 try:
@@ -161,52 +163,16 @@ Important notes:
 """
 
         try:
-            response = openai.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system",
-                     "content": "You are a helpful SQL expert assistant."},
-                    {"role": "user", "content": prompt}
-                ],
-                max_tokens=500,
-                temperature=0.1
+            response = openai.responses.create(
+                model="gpt-5",
+                input=prompt
             )
 
-            content = response.choices[0].message.content
-
-            # Parse the response
-            lines = content.strip().split('\n')
-            sql_query = ""
-            explanation = ""
-
-            for line in lines:
-                if line.startswith('SQL:'):
-                    sql_query = line.replace('SQL:', '').strip()
-                elif line.startswith('EXPLANATION:'):
-                    explanation = line.replace('EXPLANATION:', '').strip()
-
-            return {
-                'sql': sql_query,
-                'explanation': explanation,
-                'raw_response': content
-            }
-
+            return response.output_text.strip()
         except Exception as e:
             current_app.logger.error(f"OpenAI API error: {str(e)}")
-            raise Exception(f"Failed to convert query: {str(e)}")
+            raise Exception(f"Failed to convert query: {str(e)}") from e
 
-    @staticmethod
-    def execute_sql_query(sql_query: str, limit: int = 100) -> dict:
-        """
-        Execute SQL query safely
-
-        Args:
-            sql_query: The SQL query to execute
-            limit: Maximum number of rows to return
-
-        Returns:
-            dict: Contains 'data', 'columns', and 'row_count'
-        """
         if not text:
             raise ImportError("SQLAlchemy text function not available")
 
