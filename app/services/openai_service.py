@@ -29,17 +29,18 @@ class OpenAIService:
     def _validate_openai_auth() -> tuple[bool, str]:
         """
         Validate OpenAI authentication
-        
+
         Returns:
             tuple: (is_valid, error_message)
         """
         if not openai_available:
             return False, "OpenAI package not installed. Please install openai package."
-        
+
         api_key = current_app.config.get('OPENAI_API_KEY')
         if not api_key:
-            return False, "OpenAI API key not configured. Please set your API key first using the /openai/set-key endpoint."
-        
+            return False, ("OpenAI API key not configured. Please set your API key "
+                          "first using the /openai/set-key endpoint.")
+
         try:
             # Test the API key by making a simple request
             client = OpenAI(api_key=api_key)
