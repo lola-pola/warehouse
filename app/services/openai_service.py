@@ -26,6 +26,31 @@ class OpenAIService:
     """Service for handling OpenAI API interactions and NL to SQL conversion"""
 
     @staticmethod
+    def _validate_openai_auth() -> tuple[bool, str]:
+        """
+        Validate OpenAI authentication
+        
+        Returns:
+            tuple: (is_valid, error_message)
+        """
+        if not openai_available:
+            return False, "OpenAI package not installed. Please install openai package."
+        
+        api_key = current_app.config.get('OPENAI_API_KEY')
+        if not api_key:
+            return False, "OpenAI API key not configured. Please set your API key first using the /openai/set-key endpoint."
+        
+        try:
+            # Test the API key by making a simple request
+            client = OpenAI(api_key=api_key)
+            client.models.list()
+            return True, ""
+        except Exception as e:
+            error_msg = f"OpenAI authentication failed: {str(e)}"
+            current_app.logger.error(error_msg)
+            return False, error_msg
+
+    @staticmethod
     def set_api_key(api_key: str) -> bool:
         """
         Set the OpenAI API key
@@ -52,6 +77,17 @@ class OpenAIService:
         except Exception as e:
             current_app.logger.error(f"Failed to set OpenAI API key: {str(e)}")
             return False
+
+    @staticmethod
+    def is_authenticated() -> bool:
+        """
+        Check if OpenAI is properly authenticated without making an API call
+        
+        Returns:
+            bool: True if API key is configured, False otherwise
+        """
+        return (openai_available and 
+                current_app.config.get('OPENAI_API_KEY') is not None)
 
     @staticmethod
     def get_database_schema() -> str:
@@ -124,14 +160,16 @@ class OpenAIService:
 
         Returns:
             dict: Contains 'sql' query and 'explanation'
+        
+        Raises:
+            ValueError: If OpenAI authentication fails
         """
-        if not openai_available:
-            raise ImportError("OpenAI package not installed")
+        # Validate OpenAI authentication
+        is_valid, error_msg = OpenAIService._validate_openai_auth()
+        if not is_valid:
+            raise ValueError(error_msg)
 
         api_key = current_app.config.get('OPENAI_API_KEY')
-        if not api_key:
-            raise ValueError("OpenAI API key not set")
-
         client = OpenAI(api_key=api_key)
 
         # Get database schema

@@ -47,6 +47,11 @@ def create_openai_namespace(api, schemas):
         'schema': fields.String(description='Database schema description')
     })
 
+    auth_status_model = openai_ns.model('AuthStatus', {
+        'authenticated': fields.Boolean(description='Whether OpenAI is authenticated'),
+        'message': fields.String(description='Status message')
+    })
+
     sql_query_model = openai_ns.model('SQLQuery', {
         'sql': fields.String(required=True,
                              description='SQL query to execute'),
@@ -79,6 +84,42 @@ def create_openai_namespace(api, schemas):
             except Exception as e:
                 return {'error': str(e)}, 500
 
+    @openai_ns.route('/status')
+    class AuthenticationStatus(Resource):
+        """Check OpenAI authentication status"""
+
+        @openai_ns.marshal_with(auth_status_model)
+        @openai_ns.doc('check_auth_status')
+        def get(self):
+            """Check if OpenAI is properly authenticated"""
+            try:
+                is_authenticated = OpenAIService.is_authenticated()
+                
+                if is_authenticated:
+                    # Validate the actual API key
+                    is_valid, error_msg = OpenAIService._validate_openai_auth()
+                    if is_valid:
+                        return {
+                            'authenticated': True,
+                            'message': 'OpenAI API is properly configured and authenticated'
+                        }, 200
+                    else:
+                        return {
+                            'authenticated': False,
+                            'message': error_msg
+                        }, 401
+                else:
+                    return {
+                        'authenticated': False,
+                        'message': 'OpenAI API key not configured. Please set your API key using the /openai/set-key endpoint.'
+                    }, 401
+
+            except Exception as e:
+                return {
+                    'authenticated': False,
+                    'message': f'Error checking authentication: {str(e)}'
+                }, 500
+
     @openai_ns.route('/schema')
     class GetDatabaseSchema(Resource):
         """Get database schema information"""
@@ -104,6 +145,12 @@ def create_openai_namespace(api, schemas):
         def post(self):
             """Convert natural language query to SQL and execute it"""
             try:
+                # Check if OpenAI is authenticated first
+                if not OpenAIService.is_authenticated():
+                    return {
+                        'error': 'OpenAI not configured. Please set your API key first using the /openai/set-key endpoint.'
+                    }, 401
+
                 data = request.get_json()
                 nl_query = data.get('query')
                 limit = data.get('limit', 100)
@@ -135,6 +182,9 @@ def create_openai_namespace(api, schemas):
                 return response, 200
 
             except ValueError as e:
+                # Authentication and validation errors
+                if "authentication" in str(e).lower() or "api key" in str(e).lower():
+                    return {'error': str(e)}, 401
                 return {'error': str(e)}, 400
             except Exception as e:
                 return {'error': str(e)}, 500
